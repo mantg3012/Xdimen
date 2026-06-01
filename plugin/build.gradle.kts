@@ -11,7 +11,21 @@ plugins {
 }
 
 group = "io.github.islamkhsh"
-version = "0.0.8"
+// JitPack passes the tag/commit via the VERSION env var; fall back to 0.0.8 for local builds.
+version = System.getenv("VERSION") ?: "0.0.8"
+
+// Pin Java + Kotlin to the same JVM target so the build is consistent
+// regardless of the host JDK (e.g. JDK 25 here).
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+    }
+}
 
 gradlePlugin {
     plugins {
@@ -45,8 +59,6 @@ testing {
 
         @Suppress("Detekt:UnusedPrivateMember")
         val functionalTest by registering(JvmTestSuite::class) {
-            testType.set(TestSuiteType.FUNCTIONAL_TEST)
-
             dependencies {
                 implementation(libs.jupiterApi)
                 implementation(libs.jupiterEngine)
@@ -55,6 +67,8 @@ testing {
             targets {
                 all {
                     testTask.configure {
+                        dependsOn(tasks.named("pluginUnderTestMetadata"))
+                        classpath += files(tasks.named("pluginUnderTestMetadata"))
                         shouldRunAfter(test)
                     }
                 }
@@ -65,7 +79,6 @@ testing {
 
 dependencies {
     implementation(libs.kotlinStd)
-    implementation(libs.androidBuildTools)
     implementation(gradleApi())
     implementation(libs.xmlBuilder)
 

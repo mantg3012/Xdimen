@@ -1,0 +1,4 @@
+jdk:
+  - openjdk17
+install:
+  - "cd plugin && chmod +x gradlew && ./gradlew publishToMavenLocal -x test -x functionalTest"

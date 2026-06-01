@@ -1,4 +1,4 @@
-import com.android.build.gradle.BaseExtension
+import com.android.build.api.dsl.CommonExtension
 import io.gitlab.arturbosch.detekt.Detekt
 import org.jlleitschuh.gradle.ktlint.KtlintPlugin
 import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
@@ -22,7 +22,7 @@ allprojects {
 
     ktlint {
         verbose.set(true)
-        android.set(extensions.findByType(BaseExtension::class.java) != null)
+        android.set(extensions.findByType(CommonExtension::class.java) != null)
         outputToConsole.set(true)
         enableExperimentalRules.set(true)
         reporters { reporter(ReporterType.HTML) }
@@ -37,9 +37,9 @@ subprojects {
 }
 
 fun Project.configureAndroidProjectsSourceSets() {
-    (project.extensions.findByType(BaseExtension::class.java))?.run {
-        sourceSets {
-            map { it.java.srcDir("src/${it.name}/kotlin") }
+    project.extensions.findByType(CommonExtension::class.java)?.run {
+        sourceSets.configureEach {
+            java.directories.add("src/$name/kotlin")
         }
     }
 }
